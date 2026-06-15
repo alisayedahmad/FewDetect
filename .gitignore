@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+venv/
+*.pth
+*.ckpt
+data/coco/
+data/virat/
+results/
+.DS_Store
+.idea/
+.vscode/
+mlruns/
+wandb/
