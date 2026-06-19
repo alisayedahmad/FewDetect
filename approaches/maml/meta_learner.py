@@ -6,8 +6,7 @@ import copy
 
 
 class MAMLMetaLearner:
-    """MAML and FOMAML meta-learning.
-    
+    """MAML and FOMAML meta-learning    
     Inner loop: adapt classifier head on support set
     Outer loop: update initial weights based on query set performance
     """
@@ -22,9 +21,9 @@ class MAMLMetaLearner:
 
         # Only optimize the head, not the frozen backbone
         self.meta_optimizer = torch.optim.Adam(
-            self.model.head.parameters(), lr=outer_lr
+            [p for p in self.model.parameters() if p.requires_grad],
+            lr=outer_lr
         )
-
     def inner_loop(self, support_features, support_labels):
         """Adapt the model on one task's support set
         
@@ -71,7 +70,7 @@ class MAMLMetaLearner:
         # Outer loop — update initial weights
         self.meta_optimizer.zero_grad()
         query_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.head.parameters(), max_norm=10.0)
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)
         self.meta_optimizer.step()
 
         # Compute accuracy
@@ -91,7 +90,8 @@ class MAMLMetaLearner:
 
         # Inner loop — adapt with regular gradient descent
         inner_opt = torch.optim.SGD(
-            self.model.head.parameters(), lr=self.inner_lr
+            [p for p in self.model.parameters() if p.requires_grad],
+            lr=self.inner_lr
         )
 
         for step in range(self.inner_steps):
